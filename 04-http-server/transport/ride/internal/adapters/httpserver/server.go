@@ -97,18 +97,16 @@ func RunGraceful(cfg configs.Config) error {
 		return nil
 	}
 
-	// Graceful shutdown with timeout
-	// Use config if available, otherwise fall back to 15 seconds
-	grace := 15 * time.Second
-	grace = time.Duration(3) * time.Second
-	ctx, cancel := context.WithTimeout(context.Background(), grace)
-	defer cancel()
-
 	// Optional: hook for cleanup tasks
 	server.RegisterOnShutdown(func() {
 		log.Println("server is shutting down, cleanup started")
 		// close queues, flush metrics, etc.
 	})
+
+	// Graceful shutdown with timeout
+	// Use config if available, otherwise fall back to 15 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
 		// Force close if not graceful in time
