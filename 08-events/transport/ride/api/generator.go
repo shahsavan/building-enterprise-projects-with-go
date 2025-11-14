@@ -1,5 +1,4 @@
 //go:build generate
-// +build generate
 
 // This file is not built into the app. It is only used with `go generate ./api`.
 

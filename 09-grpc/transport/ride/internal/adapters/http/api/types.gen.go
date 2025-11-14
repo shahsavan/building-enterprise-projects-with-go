@@ -23,12 +23,10 @@ const (
 
 // Assignment defines model for Assignment.
 type Assignment struct {
-	CreatedAt *time.Time       `json:"createdAt,omitempty"`
-	Id        *string          `json:"id,omitempty"`
+	Metadata  *EntityMetadata  `json:"metadata,omitempty"`
 	RouteId   string           `json:"routeId"`
 	StartsAt  time.Time        `json:"startsAt"`
 	Status    AssignmentStatus `json:"status"`
-	UpdatedAt *time.Time       `json:"updatedAt,omitempty"`
 	VehicleId string           `json:"vehicleId"`
 }
 
