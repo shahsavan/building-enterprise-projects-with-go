@@ -3,11 +3,11 @@ package ports
 import (
 	"context"
 
-	"github.com/yourname/transport/ride/internal/core/domain"
+	"github.com/yourname/transport/ride/internal/models"
 )
 
 type AssignmentRepository interface {
-	Save(ctx context.Context, a domain.Assignment) (domain.Assignment, error)
-	FindByID(ctx context.Context, id string) (domain.Assignment, error)
-	FindAll(ctx context.Context, status *string) ([]domain.Assignment, error)
+	Save(ctx context.Context, a models.Assignment) (models.Assignment, error)
+	FindByID(ctx context.Context, id string) (models.Assignment, error)
+	FindAll(ctx context.Context, status *string) ([]models.Assignment, error)
 }

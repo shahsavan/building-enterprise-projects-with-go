@@ -4,8 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/yourname/transport/ride/internal/core/domain"
-	"github.com/yourname/transport/ride/internal/core/ports"
+	"github.com/yourname/transport/ride/internal/ports"
 )
 
 type assignmentService struct {

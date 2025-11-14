@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yourname/transport/ride/internal/core/ports"
+	"github.com/yourname/transport/ride/internal/ports"
 )
 
 // Minimal raw message & pull to stay stdlib-only.

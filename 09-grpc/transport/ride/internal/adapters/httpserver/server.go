@@ -10,8 +10,8 @@ import (
 	"github.com/yourname/transport/ride/configs"
 	"github.com/yourname/transport/ride/internal/adapters/http/api"
 	"github.com/yourname/transport/ride/internal/adapters/http/handler"
-	"github.com/yourname/transport/ride/internal/core/ports"
-	"github.com/yourname/transport/ride/internal/core/service"
+	"github.com/yourname/transport/ride/internal/ports"
+	"github.com/yourname/transport/ride/internal/service"
 )
 
 // Run initializes and starts the HTTP server based on the provided configuration.

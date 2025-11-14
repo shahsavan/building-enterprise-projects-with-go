@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/yourname/transport/ride/internal/adapters/avro"
-	"github.com/yourname/transport/ride/internal/core/ports"
+	"github.com/yourname/transport/ride/internal/ports"
 )
 
 type AssignmentCreatedProcessor struct{}

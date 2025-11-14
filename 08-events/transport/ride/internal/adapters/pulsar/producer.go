@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yourname/transport/ride/internal/core/ports"
+	"github.com/yourname/transport/ride/internal/ports"
 )
 
 // Abstract a minimal "send" so this stays stdlib-only here.

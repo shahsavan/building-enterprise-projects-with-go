@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourname/transport/ride/internal/adapters/http/api"
-	"github.com/yourname/transport/ride/internal/core/ports"
+	"github.com/yourname/transport/ride/internal/ports"
 )
 
 // AssignmentHandler is the HTTP adapter. It implements api.ServerInterface

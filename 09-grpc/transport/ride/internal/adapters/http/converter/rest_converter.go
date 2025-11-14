@@ -2,7 +2,7 @@ package converter
 
 import (
 	"github.com/yourname/transport/ride/internal/adapters/http/api"
-	"github.com/yourname/transport/ride/internal/core/domain"
+	"github.com/yourname/transport/ride/internal/domain"
 )
 
 // API -> Domain
