@@ -16,8 +16,8 @@ func NewSQLAssignmentRepository(db *sql.DB) ports.AssignmentRepository {
 	return &sqlAssignmentRepository{db: db}
 }
 
-func (r *sqlAssignmentRepository) Save(ctx context.Context, a models.Assignment) (models.Assignment, error) {
-	_, err := r.db.ExecContext(ctx, `
+func (r *sqlAssignmentRepository) Save(ctx context.Context, a models.Assignment) (bool, error) {
+	res, err := r.db.ExecContext(ctx, `
 		INSERT INTO assignments (id, vehicle_id, route_id, starts_at, status)
 		VALUES (?, ?, ?, ?, ?)
 		ON DUPLICATE KEY UPDATE
@@ -28,9 +28,13 @@ func (r *sqlAssignmentRepository) Save(ctx context.Context, a models.Assignment)
 		a.ID, a.VehicleID, a.RouteID, a.StartsAt, a.Status,
 	)
 	if err != nil {
-		return models.Assignment{}, err
+		return false, err
 	}
-	return a, nil
+
+	rows, _ := res.RowsAffected()
+	isNew := rows == 1 // MySQL returns 1 for insert, 2 for update
+
+	return isNew, nil
 }
 
 func (r *sqlAssignmentRepository) FindByID(ctx context.Context, id string) (models.Assignment, error) {
