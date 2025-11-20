@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/yourname/transport/ride/internal/models"
 	"github.com/yourname/transport/ride/internal/ports"
@@ -46,7 +47,8 @@ func (r *sqlAssignmentRepository) FindByID(ctx context.Context, id string) (mode
 	var a models.Assignment
 	err := row.Scan(&a.ID, &a.VehicleID, &a.RouteID, &a.StartsAt, &a.Status)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		//  err == sql.ErrNoRows
+		if errors.Is(err, sql.ErrNoRows) {
 			return models.Assignment{}, nil // caller decides how to handle "not found"
 		}
 		return models.Assignment{}, err
@@ -55,20 +57,16 @@ func (r *sqlAssignmentRepository) FindByID(ctx context.Context, id string) (mode
 }
 
 func (r *sqlAssignmentRepository) FindAll(ctx context.Context, status *string) ([]models.Assignment, error) {
-	var rows *sql.Rows
-	var err error
+	q := `
+			SELECT id, vehicle_id, route_id, starts_at, status
+			FROM assignments`
+	args := []any{}
 
 	if status != nil {
-		rows, err = r.db.QueryContext(ctx, `
-			SELECT id, vehicle_id, route_id, starts_at, status
-			FROM assignments WHERE status = ?`, *status,
-		)
-	} else {
-		rows, err = r.db.QueryContext(ctx, `
-			SELECT id, vehicle_id, route_id, starts_at, status
-			FROM assignments`,
-		)
+		q += ` WHERE status = ?`
+		args = append(args, *status)
 	}
+	rows, err := r.db.QueryContext(ctx, q, args)
 
 	if err != nil {
 		return nil, err
