@@ -1,3 +1,5 @@
+//go:build integration_test
+
 package test_containers
 
 import (
@@ -22,9 +24,8 @@ type testContainerRunner struct {
 }
 
 func (o testContainerRunner) Run(ctx context.Context) (testcontainers.Container, error) {
-	timeout := 10 * time.Minute
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
+	// Give containers more time to start; network can take a while.
+	timeout := 3 * time.Minute
 	req := testcontainers.ContainerRequest{
 		Name:               o.name,
 		Image:              o.image,
@@ -39,7 +40,7 @@ func (o testContainerRunner) Run(ctx context.Context) (testcontainers.Container,
 		Started:          true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("[testContainerRunner] %w", err)
+		return nil, err
 	}
 	return container, nil
 }

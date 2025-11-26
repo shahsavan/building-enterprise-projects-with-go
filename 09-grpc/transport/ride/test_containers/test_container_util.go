@@ -1,9 +1,10 @@
+//go:build integration_test
+
 package test_containers
 
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
@@ -11,8 +12,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
-
-var allRunners sync.Once
 
 type testContainerRunner struct {
 	servicePort        int
@@ -24,10 +23,9 @@ type testContainerRunner struct {
 	hostConfigModifier func(*container.HostConfig)
 }
 
-func (o testContainerRunner) Run() (testcontainers.Container, error) {
-	timeout := 10 * time.Minute
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
+func (o testContainerRunner) Run(ctx context.Context) (testcontainers.Container, error) {
+	// Give containers more time to start; network can take a while.
+	timeout := 3 * time.Minute
 	req := testcontainers.ContainerRequest{
 		Name:               o.name,
 		Image:              o.image,
@@ -42,7 +40,7 @@ func (o testContainerRunner) Run() (testcontainers.Container, error) {
 		Started:          true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("[testContainerRunner] %w", err)
+		return nil, err
 	}
 	return container, nil
 }

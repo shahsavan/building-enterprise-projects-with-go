@@ -14,26 +14,32 @@ import (
 )
 
 func TestSQLAssignmentRepository_SaveAndFind(t *testing.T) {
-	host, port, err := test_containers.GetMySqlContainer("testdb", "testuser", "testpass", nil)
-	if err != nil {
-		t.Fatalf("failed to start container: %v", err)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	host, port := test_containers.GetMySqlContainer(ctx, "testdb", "testuser", "testpass", nil)
 
 	dsn := fmt.Sprintf("testuser:testpass@tcp(%s:%s)/testdb?parseTime=true", host, port)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		t.Fatalf("failed to connect: %v", err)
 	}
-	defer db.Close()
+
+	t.Cleanup(func() {
+		_ = db.Close()
+	})
 
 	// Schema setup
-	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS assignments (
-        id VARCHAR(50) PRIMARY KEY,
-        vehicle_id VARCHAR(50),
-        route_id VARCHAR(50),
-        starts_at DATETIME,
-        status VARCHAR(20)
-    );`)
+	_, err = db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS assignments (
+	    id VARCHAR(50) PRIMARY KEY,
+	    vehicle_id VARCHAR(50),
+	    route_id VARCHAR(50),
+	    starts_at DATETIME,
+	    status VARCHAR(20)
+	);`)
+
+	if err != nil {
+		t.Fatalf("failed to create table: %v", err)
+	}
 
 	repo := repository.NewSQLAssignmentRepository(db)
 

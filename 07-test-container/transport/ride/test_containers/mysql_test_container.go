@@ -1,15 +1,14 @@
+//go:build integration_test
+
 package test_containers
 
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
-	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
-	_ "github.com/lib/pq"
 	"github.com/rs/zerolog/log"
 )
 
@@ -19,7 +18,7 @@ var (
 	mysqlPort string
 )
 
-func GetMySqlContainer(ctx context.Context, db, user, pass string, port *int) (string, string, error) {
+func GetMySqlContainer(ctx context.Context, db, user, pass string, port *int) (string, string) {
 	mysqlOnce.Do(func() {
 		c, err := testContainerRunner{
 			servicePort:  3306,
@@ -38,7 +37,7 @@ func GetMySqlContainer(ctx context.Context, db, user, pass string, port *int) (s
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to run Test Container")
 		}
-		port, err := c.MappedPort(ctx, "3306")
+		mp, err := c.MappedPort(ctx, "3306")
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to get port")
 		}
@@ -47,48 +46,21 @@ func GetMySqlContainer(ctx context.Context, db, user, pass string, port *int) (s
 			log.Fatal().Err(err).Msg("Failed to get host")
 		}
 		mysqlHost = h
-		mysqlPort = port.Port()
-		err = isPortAccessible(mysqlHost, mysqlPort)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Port is not accessible")
-		}
+		mysqlPort = mp.Port()
 	})
-	return mysqlHost, mysqlPort, nil
+	return mysqlHost, mysqlPort
 }
+
 func mysqlHostConfigModifier(port *int) func(hostConfig *container.HostConfig) {
-	var p int
-	if port != nil {
-		p = *port
-	} else {
-		p = 3306
-	}
 	return func(hostConfig *container.HostConfig) {
 		hostConfig.AutoRemove = true
-		hostConfig.PortBindings = nat.PortMap{"3306/tcp": []nat.PortBinding{
-			{
-				HostIP:   "0.0.0.0",
-				HostPort: fmt.Sprintf("%d", p),
-			},
-		}}
-	}
-}
-func isPortAccessible(host string, port string) error {
-	address := net.JoinHostPort(host, port)
-	timeout := 2 * time.Second
-	var err error
-
-	for i := 1; i <= 10; i++ {
-		var conn net.Conn
-		conn, err = net.DialTimeout("tcp", address, timeout)
-		if err == nil {
-			log.Info().Msgf("Successfully connected to the MySQL on Host %s and Port %s on attempt %d.\n", host, port, i)
-			break
+		if port != nil {
+			hostConfig.PortBindings = nat.PortMap{"3306/tcp": []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: fmt.Sprintf("%d", *port),
+				},
+			}}
 		}
-		defer conn.Close()
-		time.Sleep(3 * time.Second)
 	}
-	if err != nil {
-		return err
-	}
-	return nil
 }
