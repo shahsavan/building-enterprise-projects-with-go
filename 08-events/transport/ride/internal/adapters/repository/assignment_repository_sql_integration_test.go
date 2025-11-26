@@ -11,12 +11,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/yourname/transport/ride/internal/adapters/repository"
-	"github.com/yourname/transport/ride/internal/core/domain"
+	"github.com/yourname/transport/ride/internal/models"
 	"github.com/yourname/transport/ride/test_containers"
 )
 
 func TestSQLAssignmentRepository_SaveAndFind(t *testing.T) {
-	host, port, err := test_containers.GetMySqlContainer("testdb", "testuser", "testpass")
+	host, port, err := test_containers.GetMySqlContainer("testdb", "testuser", "testpass", nil)
 	if err != nil {
 		t.Fatalf("failed to start container: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestSQLAssignmentRepository_SaveAndFind(t *testing.T) {
 
 	repo := repository.NewSQLAssignmentRepository(db)
 
-	assignment := domain.Assignment{
+	assignment := models.Assignment{
 		ID:        "A1",
 		VehicleID: "V1",
 		RouteID:   "R1",
