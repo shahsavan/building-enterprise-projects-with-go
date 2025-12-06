@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "NotificationIssued",
+  "namespace": "transport.notifications",
+  "fields": [
+    { "name": "recipientId", "type": "string" },
+    { "name": "channel", "type": { "type": "enum", "name": "Channel", "symbols": ["SMS", "EMAIL", "PUSH"] } },
+    { "name": "message", "type": "string" },
+    { "name": "eventType", "type": "string" },
+    { "name": "timestamp", "type": "string" }
+  ]
+}
