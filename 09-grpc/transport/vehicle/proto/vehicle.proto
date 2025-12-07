@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package vehiclepb;
-option go_package = "github.com/yourname/transport/vehicle/vehiclepb;vehiclepb";
+option go_package = "github.com/yourname/transport/vehicle/internal/vehiclepb;vehiclepb";
 
 service VehicleService {
   rpc FindAvailableVehicle(FindRequest) returns (FindResponse);

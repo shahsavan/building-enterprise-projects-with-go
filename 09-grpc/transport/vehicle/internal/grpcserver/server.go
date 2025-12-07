@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/yourname/transport/vehicle/configs"
-	vehiclepb "github.com/yourname/transport/vehicle/grpc"
+	vehiclepb "github.com/yourname/transport/vehicle/internal/grpc"
 	"google.golang.org/grpc"
 )
 
@@ -20,7 +20,9 @@ func Run(cfg configs.ServerConfig, grpcSrv vehiclepb.VehicleServiceServer) error
 	}
 
 	grpcServer := grpc.NewServer(
-		grpc.ConnectionTimeout(time.Duration(cfg.ConnectionTimeoutSec) * time.Second),
+		grpc.UnaryInterceptor(LoggingUnaryInterceptor),
+		grpc.StreamInterceptor(LoggingStreamInterceptor),
+		grpc.ConnectionTimeout(time.Duration(cfg.ConnectionTimeoutSec)*time.Second),
 	)
 	vehiclepb.RegisterVehicleServiceServer(grpcServer, grpcSrv)
 

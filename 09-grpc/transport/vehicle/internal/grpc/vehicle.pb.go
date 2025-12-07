@@ -359,7 +359,7 @@ const file_vehicle_proto_rawDesc = "" +
 	"\x0eVehicleService\x12G\n" +
 	"\x14FindAvailableVehicle\x12\x16.vehiclepb.FindRequest\x1a\x17.vehiclepb.FindResponse\x12A\n" +
 	"\x0eGetVehicleInfo\x12\x16.vehiclepb.InfoRequest\x1a\x17.vehiclepb.InfoResponse\x12O\n" +
-	"\x11StreamAssignments\x12\x1c.vehiclepb.AssignmentRequest\x1a\x18.vehiclepb.AssignmentAck(\x010\x01B;Z9github.com/yourname/transport/vehicle/vehiclepb;vehiclepbb\x06proto3"
+	"\x11StreamAssignments\x12\x1c.vehiclepb.AssignmentRequest\x1a\x18.vehiclepb.AssignmentAck(\x010\x01BDZBgithub.com/yourname/transport/vehicle/internal/vehiclepb;vehiclepbb\x06proto3"
 
 var (
 	file_vehicle_proto_rawDescOnce sync.Once

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	vehiclepb "github.com/yourname/transport/vehicle/grpc"
+	vehiclepb "github.com/yourname/transport/vehicle/internal/grpc"
 )
 
 // Service is our concrete implementation of the gRPC VehicleServiceServer interface.
