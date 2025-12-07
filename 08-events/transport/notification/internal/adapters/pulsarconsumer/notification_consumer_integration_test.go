@@ -13,7 +13,7 @@ import (
 	avroschemas "github.com/yourname/transport/notification/avro_schemas"
 	"github.com/yourname/transport/notification/internal/adapters/pulsarconsumer"
 	"github.com/yourname/transport/notification/internal/ports"
-	"github.com/yourname/transport/ride/test_containers"
+	"github.com/yourname/transport/notification/test_containers"
 )
 
 func TestNotificationConsumerProcessesMessage(t *testing.T) {

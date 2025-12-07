@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yourname/transport/ride/configs"
+	"github.com/yourname/transport/vehicle/configs"
 )
 
 func TestLoadConfig(t *testing.T) {
