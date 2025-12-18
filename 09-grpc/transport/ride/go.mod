@@ -3,13 +3,13 @@ module github.com/yourname/transport/ride
 go 1.25.1
 
 require (
-	github.com/apache/pulsar-client-go v0.16.0
+	github.com/apache/pulsar-client-go v0.17.0
 	github.com/docker/docker v28.4.0+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/hamba/avro/v2 v2.26.0
+	github.com/hamba/avro/v2 v2.29.0
 	github.com/oapi-codegen/oapi-codegen/v2 v2.5.0
 	github.com/oapi-codegen/runtime v1.1.2
 	github.com/rs/zerolog v1.34.0
@@ -62,6 +62,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.20.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -81,7 +82,6 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.1.0 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
