@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/yourname/transport/ride/configs"
 	"github.com/yourname/transport/ride/internal/adapters/httpserver"
@@ -30,6 +31,12 @@ func main() {
 		log.Fatalf("failed to open database: %v", err)
 	}
 	defer db.Close()
+
+	// Pool configuration (database/sql pool lives inside *sql.DB)
+	db.SetMaxOpenConns(cfg.Database.MaxOpenConns)
+	db.SetMaxIdleConns(cfg.Database.MaxIdleConns)
+	db.SetConnMaxLifetime(time.Duration(cfg.Database.ConnMaxLifetime) * time.Second)
+	db.SetConnMaxIdleTime(time.Duration(cfg.Database.ConnMaxIdleTime) * time.Second)
 
 	assignmentRepo := repository.NewSQLAssignmentRepository(db)
 

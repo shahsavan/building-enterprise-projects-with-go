@@ -36,6 +36,8 @@ database:
   name: "transportdb"
   max_open_conns: 20
   max_idle_conns: 5
+  conn_max_lifetime_sec: 300
+  conn_max_idle_time_sec: 60
 `
 	invalidYAML := `
 server:
@@ -64,13 +66,15 @@ database
 					WriteTimeoutSec: 30,
 				},
 				Database: configs.DatabaseConfig{
-					Host:         "mysql.internal",
-					Port:         3306,
-					User:         "ride_user",
-					Password:     "from_file",
-					Name:         "transportdb",
-					MaxOpenConns: 20,
-					MaxIdleConns: 5,
+					Host:            "mysql.internal",
+					Port:            3306,
+					User:            "ride_user",
+					Password:        "from_file",
+					Name:            "transportdb",
+					MaxOpenConns:    20,
+					MaxIdleConns:    5,
+					ConnMaxLifetime: 300,
+					ConnMaxIdleTime: 60,
 				},
 			},
 			expectErr: false,
@@ -91,13 +95,15 @@ database
 					WriteTimeoutSec: 30,
 				},
 				Database: configs.DatabaseConfig{
-					Host:         "mysql.internal",
-					Port:         3306,
-					User:         "ride_user",
-					Password:     "from_env", // overridden
-					Name:         "transportdb",
-					MaxOpenConns: 20,
-					MaxIdleConns: 5,
+					Host:            "mysql.internal",
+					Port:            3306,
+					User:            "ride_user",
+					Password:        "from_env", // overridden
+					Name:            "transportdb",
+					MaxOpenConns:    20,
+					MaxIdleConns:    5,
+					ConnMaxLifetime: 300,
+					ConnMaxIdleTime: 60,
 				},
 			},
 			expectErr: false,
@@ -117,13 +123,15 @@ database
 					WriteTimeoutSec: 30,
 				},
 				Database: configs.DatabaseConfig{
-					Host:         "mysql.internal",
-					Port:         3306,
-					User:         "ride_user",
-					Password:     "from_file",
-					Name:         "transportdb",
-					MaxOpenConns: 20,
-					MaxIdleConns: 5,
+					Host:            "mysql.internal",
+					Port:            3306,
+					User:            "ride_user",
+					Password:        "from_file",
+					Name:            "transportdb",
+					MaxOpenConns:    20,
+					MaxIdleConns:    5,
+					ConnMaxLifetime: 300,
+					ConnMaxIdleTime: 60,
 				},
 			},
 			expectErr: false,
@@ -188,6 +196,8 @@ database:
   name: "transportdb"
   max_open_conns: 20
   max_idle_conns: 5
+  conn_max_lifetime_sec: 300
+  conn_max_idle_time_sec: 60
 `
 
 	// Seeds cover common and edge cases: valid override, invalid port, and max-ish port.
