@@ -10,10 +10,7 @@ type Decoder[T any] func([]byte) (T, error)
 type Message[T any] struct {
 	Key      string
 	Value    T
-	Attempt  int // redelivery count (if available)
 	Metadata map[string]string
-	Ack      func() error // ack on success
-	Nack     func()       // request redelivery
 }
 
 // Business logic hook. Your app implements this per event.

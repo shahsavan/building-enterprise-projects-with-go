@@ -1,6 +1,6 @@
 //go:build integration_test
 
-package pulsarproducer_test
+package pulsar_connector_test
 
 import (
 	"context"
@@ -10,7 +10,8 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 
-	"github.com/yourname/transport/ride/internal/adapters/pulsarproducer"
+	"github.com/yourname/transport/ride/configs"
+	"github.com/yourname/transport/ride/internal/adapters/pulsar_connector"
 	"github.com/yourname/transport/ride/internal/ports"
 	"github.com/yourname/transport/ride/test_containers"
 )
@@ -30,10 +31,18 @@ func TestAssignmentCreatedProducerPublishesMessage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("pulsar setup failed: %v", err)
 	}
+	var cfg configs.Config
+	cfg.Pulsar = configs.PulsarConfig{
+		URL:                     fmt.Sprintf("pulsar://%s:%s", pulsarEnv.Host, pulsarEnv.Port),
+		OperationTimeout:        30 * time.Second,
+		ConnectionTimeout:       10 * time.Second,
+		ConnectionMaxIdleTime:   120 * time.Second,
+		KeepAliveInterval:       30 * time.Second,
+		MaxConnectionsPerBroker: 3,
+		MemoryLimitBytes:        67108864,
+	}
 
-	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: fmt.Sprintf("pulsar://%s:%s", pulsarEnv.Host, pulsarEnv.Port),
-	})
+	client, err := pulsar_connector.NewPulsarClient(cfg.Pulsar)
 	if err != nil {
 		t.Fatalf("failed to create pulsar client: %v", err)
 	}
@@ -53,7 +62,14 @@ func TestAssignmentCreatedProducerPublishesMessage(t *testing.T) {
 		consumer.Close()
 	})
 
-	producer, err := pulsarproducer.NewAssignmentCreatedProducer(client)
+	producerCfg := configs.PulsarProducerConfig{
+		Topic:                   topic,
+		SendTimeout:             2 * time.Second,
+		MaxPendingMessages:      1000,
+		BatchingMaxPublishDelay: 10 * time.Millisecond,
+	}
+
+	producer, err := pulsar_connector.NewAssignmentCreatedProducer(client, producerCfg)
 	if err != nil {
 		t.Fatalf("failed to create producer: %v", err)
 	}

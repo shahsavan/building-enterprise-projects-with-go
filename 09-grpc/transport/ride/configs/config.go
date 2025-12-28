@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -28,9 +29,48 @@ type DatabaseConfig struct {
 	ConnMaxIdleTime int    `yaml:"conn_max_idle_time_sec"`
 }
 
+type PulsarConfig struct {
+	URL string `yaml:"url"`
+
+	OperationTimeout        time.Duration `yaml:"operation_timeout"`
+	ConnectionTimeout       time.Duration `yaml:"connection_timeout"`
+	ConnectionMaxIdleTime   time.Duration `yaml:"connection_max_idle_time"`
+	KeepAliveInterval       time.Duration `yaml:"keep_alive_interval"`
+	MaxConnectionsPerBroker int           `yaml:"max_connections_per_broker"`
+	MemoryLimitBytes        int64         `yaml:"memory_limit_bytes"`
+
+	Consumer PulsarConsumerConfig `yaml:"consumer"`
+	Producer PulsarProducerConfig `yaml:"producer"`
+}
+
+type PulsarConsumerConfig struct {
+	Topic                string        `yaml:"topic"`                   // topic name
+	SubscriptionName     string        `yaml:"subscription_name"`       // subscription name
+	Name                 string        `yaml:"name"`                    // optional consumer name
+	SubscriptionType     string        `yaml:"subscription_type"`       // exclusive|shared|failover|key_shared; defaults to shared when empty
+	ReceiverQueueSize    int           `yaml:"receiver_queue_size"`     // Receiver Queue Size
+	NackRedeliveryDelay  time.Duration `yaml:"nack_redelivery_delay"`   // Nack Redelivery Delay
+	MaxReconnectToBroker *uint         `yaml:"max_reconnect_to_broker"` // Maximum Reconnect To Broker
+	AutoDiscoveryPeriod  time.Duration `yaml:"auto_discovery_period"`   // Auto Discovery Period
+}
+
+type PulsarProducerConfig struct {
+	Topic                           string         `yaml:"topic"` // topic name
+	Name                            *string        `yaml:"name"`
+	CompressionType                 *string        `yaml:"compression_type"`
+	PartitionsAutoDiscoveryInterval *time.Duration `yaml:"partitions_auto_discovery_interval"`
+	SendTimeout                     time.Duration  `yaml:"send_timeout"` // bounds Send() latency; disabled when zero
+	MaxPendingMessages              int            `yaml:"max_pending_messages"`
+	DisableBlockIfQueueFull         bool           `yaml:"disable_block_if_queue_full"`
+	MaxReconnectToBroker            *uint          `yaml:"max_reconnect_to_broker"`
+	DisableBatching                 bool           `yaml:"disable_batching"`
+	BatchingMaxPublishDelay         time.Duration  `yaml:"batching_max_publish_delay"`
+}
+
 type Config struct {
 	Server   ServerConfig   `yaml:"server"`
 	Database DatabaseConfig `yaml:"database"`
+	Pulsar   PulsarConfig   `yaml:"pulsar"`
 }
 
 // LoadConfig reads and parses the configuration file from the given path.

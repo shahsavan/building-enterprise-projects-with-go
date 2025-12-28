@@ -13,3 +13,39 @@ database:
   max_idle_conns: 5
   conn_max_lifetime_sec: 300
   conn_max_idle_time_sec: 60
+
+pulsar:
+  url: "pulsar://localhost:6650"
+  operation_timeout: 30s
+  connection_timeout: 10s
+  connection_max_idle_time: 120s
+  keep_alive_interval: 30s
+  max_connections_per_broker: 3
+  memory_limit_bytes: 67108864
+  consumer:
+    topic: "notifications"
+    subscription_name: "notifications"
+    name: "notifications"
+    receiver_queue_size: 10
+    nack_redelivery_delay: 10s
+    max_reconnect_to_broker: 4
+    auto_discovery_period: 120s
+    subscription_type: "shared" # exclusive | shared | failover | key_shared
+    receive_timeout: 0s
+    receive_backoff: 1s
+    receive_backoff_cap: 30s
+    receive_backoff_jitter: 0.2
+    max_receive_errors: 5
+    max_redeliveries: 0
+
+  producer:
+    topic: "notifications"
+    name: "notifications"
+    compression_type: "LZ4"
+    partitions_auto_discovery_interval: 10s
+    send_timeout: 2s
+    max_pending_messages: 1000
+    disable_block_if_queue_full: true
+    
+    disable_batching: false
+    batching_max_publish_delay: 10ms
