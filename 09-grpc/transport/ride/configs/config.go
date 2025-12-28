@@ -29,11 +29,6 @@ type DatabaseConfig struct {
 	ConnMaxIdleTime int    `yaml:"conn_max_idle_time_sec"`
 }
 
-type Config struct {
-	Server   ServerConfig   `yaml:"server"`
-	Database DatabaseConfig `yaml:"database"`
-	Pulsar   PulsarConfig   `yaml:"pulsar"`
-}
 type PulsarConfig struct {
 	URL string `yaml:"url"`
 
@@ -70,6 +65,12 @@ type PulsarProducerConfig struct {
 	MaxReconnectToBroker            *uint          `yaml:"max_reconnect_to_broker"`
 	DisableBatching                 bool           `yaml:"disable_batching"`
 	BatchingMaxPublishDelay         time.Duration  `yaml:"batching_max_publish_delay"`
+}
+
+type Config struct {
+	Server   ServerConfig   `yaml:"server"`
+	Database DatabaseConfig `yaml:"database"`
+	Pulsar   PulsarConfig   `yaml:"pulsar"`
 }
 
 // LoadConfig reads and parses the configuration file from the given path.

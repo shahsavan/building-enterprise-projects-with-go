@@ -20,6 +20,7 @@ func NewPulsarClient(cfg configs.PulsarConfig) (pulsar.Client, error) {
 		KeepAliveInterval:       cfg.KeepAliveInterval,
 		MaxConnectionsPerBroker: cfg.MaxConnectionsPerBroker,
 		MemoryLimitBytes:        cfg.MemoryLimitBytes,
+		MetricsCardinality:      pulsar.MetricsCardinalityTopic,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error in instantiate Pulsar: %w", err)

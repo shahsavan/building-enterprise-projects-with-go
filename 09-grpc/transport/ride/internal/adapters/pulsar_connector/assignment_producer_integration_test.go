@@ -36,7 +36,7 @@ func TestAssignmentCreatedProducerPublishesMessage(t *testing.T) {
 		URL:                     fmt.Sprintf("pulsar://%s:%s", pulsarEnv.Host, pulsarEnv.Port),
 		OperationTimeout:        30 * time.Second,
 		ConnectionTimeout:       10 * time.Second,
-		ConnectionMaxIdleTime:   10 * time.Second,
+		ConnectionMaxIdleTime:   120 * time.Second,
 		KeepAliveInterval:       30 * time.Second,
 		MaxConnectionsPerBroker: 3,
 		MemoryLimitBytes:        67108864,
@@ -65,12 +65,7 @@ func TestAssignmentCreatedProducerPublishesMessage(t *testing.T) {
 	producerCfg := configs.PulsarProducerConfig{
 		Topic:                   topic,
 		SendTimeout:             2 * time.Second,
-		RetryMaxAttempts:        4,
-		RetryBackoff:            100 * time.Millisecond,
-		RetryBackoffCap:         2 * time.Second,
-		RetryJitter:             0.2,
 		MaxPendingMessages:      1000,
-		BatchingEnabled:         true,
 		BatchingMaxPublishDelay: 10 * time.Millisecond,
 	}
 

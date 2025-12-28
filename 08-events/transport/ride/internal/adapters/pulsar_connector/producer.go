@@ -45,7 +45,7 @@ func NewProducer[T any](cfg ProducerConfig[T]) (*Producer[T], error) {
 	}
 
 	// Prepare Pulsar producer options.
-	opts := getProducerOptions(cfg.Topic, cfg.Schema, pcfg)
+	opts := getProducerOptions(cfg.Schema, pcfg)
 	// Create the underlying Pulsar producer.
 	prod, err := cfg.Client.CreateProducer(opts)
 	if err != nil {
