@@ -1,6 +1,6 @@
 //go:build integration_test
 
-package pulsarconsumer_test
+package pulsar_connector_test
 
 import (
 	"context"
@@ -11,9 +11,10 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 
 	avroschemas "github.com/yourname/transport/notification/avro_schemas"
-	"github.com/yourname/transport/notification/internal/adapters/pulsarconsumer"
+	"github.com/yourname/transport/notification/internal/adapters/pulsar_connector"
 	"github.com/yourname/transport/notification/internal/ports"
 	"github.com/yourname/transport/notification/test_containers"
+	"github.com/yourname/transport/ride/configs"
 )
 
 func TestNotificationConsumerProcessesMessage(t *testing.T) {
@@ -32,9 +33,16 @@ func TestNotificationConsumerProcessesMessage(t *testing.T) {
 		t.Fatalf("pulsar setup failed: %v", err)
 	}
 
-	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: fmt.Sprintf("pulsar://%s:%s", pulsarEnv.Host, pulsarEnv.Port),
-	})
+	plscfg := configs.PulsarConfig{
+		URL:                     fmt.Sprintf("pulsar://%s:%s", pulsarEnv.Host, pulsarEnv.Port),
+		OperationTimeout:        30 * time.Second,
+		ConnectionTimeout:       10 * time.Second,
+		ConnectionMaxIdleTime:   120 * time.Second,
+		KeepAliveInterval:       30 * time.Second,
+		MaxConnectionsPerBroker: 3,
+		MemoryLimitBytes:        67108864,
+	}
+	client, err := pulsar_connector.NewPulsarClient(plscfg)
 	if err != nil {
 		t.Fatalf("failed to create pulsar client: %v", err)
 	}
@@ -42,7 +50,7 @@ func TestNotificationConsumerProcessesMessage(t *testing.T) {
 		client.Close()
 	})
 
-	consumer, err := pulsarconsumer.NewNotificationConsumer(client, "notification-service")
+	consumer, err := pulsar_connector.NewNotificationConsumer(client, "notification-service")
 	if err != nil {
 		t.Fatalf("failed to create notification consumer: %v", err)
 	}

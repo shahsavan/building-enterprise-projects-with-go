@@ -1,10 +1,12 @@
-package pulsarproducer
+package pulsar_connector
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsar"
+
+	"github.com/yourname/transport/ride/configs"
 	"github.com/yourname/transport/ride/internal/ports"
 )
 
@@ -17,10 +19,12 @@ type Producer[T any] struct {
 
 // ProducerConfig holds settings for creating a Producer.
 type ProducerConfig[T any] struct {
-	Client  pulsar.Client    // Pulsar client (managed by caller)
-	Topic   string           // Pulsar topic name (required)
-	Schema  pulsar.Schema    // Optional Pulsar schema (e.g. Avro/JSON schema)
-	Encoder ports.Encoder[T] // Optional encoder for payloads
+	Client pulsar.Client // Pulsar client (managed by caller)
+	Topic  string        // Pulsar topic name (required unless provided via PulsarConfigs)
+	Schema pulsar.Schema // Optional Pulsar schema (e.g. Avro/JSON schema)
+
+	Encoder       ports.Encoder[T]             // Optional encoder for payloads
+	PulsarConfigs configs.PulsarProducerConfig // transport configs for producer
 }
 
 // NewProducer creates a new Producer. The Pulsar client and resources
@@ -31,20 +35,58 @@ func NewProducer[T any](cfg ProducerConfig[T]) (*Producer[T], error) {
 	if cfg.Client == nil {
 		return nil, fmt.Errorf("pulsarproducer: client is nil")
 	}
+
+	pcfg := cfg.PulsarConfigs
+	if cfg.Topic == "" {
+		cfg.Topic = pcfg.Topic
+	}
 	if cfg.Topic == "" {
 		return nil, fmt.Errorf("pulsarproducer: topic is required")
 	}
+
 	// Prepare Pulsar producer options.
-	opts := pulsar.ProducerOptions{Topic: cfg.Topic}
-	if cfg.Schema != nil {
-		opts.Schema = cfg.Schema // register schema if provided
-	}
+	opts := getProducerOptions(cfg.Topic, cfg.Schema, pcfg)
 	// Create the underlying Pulsar producer.
 	prod, err := cfg.Client.CreateProducer(opts)
 	if err != nil {
 		return nil, fmt.Errorf("pulsarproducer: could not create producer: %w", err)
 	}
 	return &Producer[T]{producer: prod, topic: cfg.Topic, encoder: cfg.Encoder}, nil
+}
+
+func getProducerOptions(schema pulsar.Schema, pcfg configs.PulsarProducerConfig) pulsar.ProducerOptions {
+	opts := pulsar.ProducerOptions{Topic: pcfg.Topic}
+	if schema != nil {
+		opts.Schema = schema
+	}
+
+	if pcfg.CompressionType != nil {
+		opts.CompressionType = parseCompressionType(*pcfg.CompressionType)
+	}
+
+	if pcfg.Name != nil {
+		opts.Name = *pcfg.Name
+	}
+
+	if pcfg.PartitionsAutoDiscoveryInterval != nil {
+		opts.PartitionsAutoDiscoveryInterval = *pcfg.PartitionsAutoDiscoveryInterval
+	}
+
+	if pcfg.SendTimeout > 0 {
+		opts.SendTimeout = pcfg.SendTimeout
+	}
+
+	if pcfg.MaxPendingMessages > 0 {
+		opts.MaxPendingMessages = pcfg.MaxPendingMessages
+	}
+	opts.DisableBlockIfQueueFull = pcfg.DisableBlockIfQueueFull
+	opts.MaxReconnectToBroker = pcfg.MaxReconnectToBroker
+	opts.DisableBatching = pcfg.DisableBatching
+	if pcfg.BatchingMaxPublishDelay > 0 {
+		opts.BatchingMaxPublishDelay = pcfg.BatchingMaxPublishDelay
+	}
+
+	return opts
 }
 
 // Send publishes a message with the given payload. If an encoder was
@@ -75,6 +117,23 @@ func (p *Producer[T]) Send(ctx context.Context, payload T) (string, error) {
 // will be flushed or returned as errors according to Pulsar settings.
 func (p *Producer[T]) Close() {
 	p.producer.Close()
+}
+
+func parseCompressionType(compressionType string) pulsar.CompressionType {
+	switch compressionType {
+	case "NONE":
+		return pulsar.NoCompression
+	case "LZ4":
+		return pulsar.LZ4
+	case "ZLIB":
+		return pulsar.ZLib
+	case "ZSTD":
+		return pulsar.ZSTD
+	case "SNAPPY":
+		return pulsar.SNAPPY
+	default:
+		return pulsar.NoCompression
+	}
 }
 
 var _ ports.EventProducer[any] = (*Producer[any])(nil)
