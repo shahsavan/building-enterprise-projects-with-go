@@ -24,3 +24,12 @@ run:
 
 clean:
 	rm -rf $(BIN_DIR)/$(BIN_NAME)
+
+gcpc_generate:
+	protoc \
+	  --proto_path=proto \
+	  --go_out=internal/grpc \
+	  --go_opt=paths=source_relative \
+	  --go-grpc_out=internal/grpc \
+	  --go-grpc_opt=paths=source_relative \
+	  proto/vehicle.proto
