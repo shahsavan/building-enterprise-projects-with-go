@@ -15,5 +15,6 @@ func main() {
 	}
 
 	vs := service.NewService()
-	grpcserver.Run(cfg.Server, vs)
+	grpcServer := grpcserver.NewGRPCServer(cfg.Server, vs)
+	grpcserver.Run(grpcServer, cfg.Server.Port)
 }
