@@ -14,7 +14,7 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	vs := service.NewService()
-	grpcServer := grpcserver.NewGRPCServer(cfg.Server, vs)
+	var vs service.VehicleService
+	grpcServer := grpcserver.NewGRPCServer(cfg.Server, &vs)
 	grpcserver.Run(grpcServer, cfg.Server.Port)
 }

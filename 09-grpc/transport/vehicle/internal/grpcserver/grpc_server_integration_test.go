@@ -14,6 +14,7 @@ import (
 	vehiclepb "github.com/yourname/transport/vehicle/internal/grpc"
 	"github.com/yourname/transport/vehicle/internal/service"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 )
@@ -44,9 +45,7 @@ func dialBufconn(t *testing.T, lis *bufconn.Listener) *grpc.ClientConn {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	t.Cleanup(cancel)
 
-	conn, err := grpc.DialContext(
-		ctx,
-		"bufnet",
+	conn, err := dialReady(ctx, "passthrough:///bufnet",
 		grpc.WithContextDialer(func(ctx context.Context, s string) (net.Conn, error) {
 			return lis.DialContext(ctx)
 		}),
@@ -62,7 +61,8 @@ func dialBufconn(t *testing.T, lis *bufconn.Listener) *grpc.ClientConn {
 }
 
 func TestNewGRPCServerServesRequests(t *testing.T) {
-	_, lis := startBufconnServer(t, service.NewService())
+	var vhs service.VehicleService
+	_, lis := startBufconnServer(t, &vhs)
 	client := vehiclepb.NewVehicleServiceClient(dialBufconn(t, lis))
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -78,7 +78,8 @@ func TestNewGRPCServerServesRequests(t *testing.T) {
 }
 
 func TestNewGRPCServerHandlesConcurrentRequests(t *testing.T) {
-	_, lis := startBufconnServer(t, service.NewService())
+	var vhs service.VehicleService
+	_, lis := startBufconnServer(t, &vhs)
 	client := vehiclepb.NewVehicleServiceClient(dialBufconn(t, lis))
 
 	var wg sync.WaitGroup
@@ -108,7 +109,8 @@ func TestNewGRPCServerHandlesConcurrentRequests(t *testing.T) {
 
 func TestRunServesAndStopsOnSignal(t *testing.T) {
 	port := freePort(t)
-	grpcServer := NewGRPCServer(configs.ServerConfig{ConnectionTimeoutSec: 5}, service.NewService())
+	var vhs service.VehicleService
+	grpcServer := NewGRPCServer(configs.ServerConfig{ConnectionTimeoutSec: 5}, &vhs)
 
 	done := make(chan error, 1)
 	go func() { done <- Run(grpcServer, port) }()
@@ -181,11 +183,9 @@ func dialTCP(t *testing.T, port int) *grpc.ClientConn {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	t.Cleanup(cancel)
-	conn, err := grpc.DialContext(
-		ctx,
-		fmt.Sprintf("localhost:%d", port),
+
+	conn, err := dialReady(ctx, fmt.Sprintf("dns:///localhost:%d", port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
 	)
 	if err != nil {
 		t.Fatalf("failed to dial tcp server: %v", err)
@@ -229,4 +229,29 @@ func (s *slowService) FindAvailableVehicle(ctx context.Context, req *vehiclepb.F
 		VehicleId: "bus-123",
 		Status:    "available",
 	}, nil
+}
+
+func dialReady(ctx context.Context, target string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+	conn, err := grpc.NewClient(target, opts...)
+	if err != nil {
+		return nil, err
+	}
+	if err := waitForReady(ctx, conn); err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	return conn, nil
+}
+
+func waitForReady(ctx context.Context, conn *grpc.ClientConn) error {
+	conn.Connect()
+	for {
+		state := conn.GetState()
+		if state == connectivity.Ready {
+			return nil
+		}
+		if !conn.WaitForStateChange(ctx, state) {
+			return ctx.Err()
+		}
+	}
 }
