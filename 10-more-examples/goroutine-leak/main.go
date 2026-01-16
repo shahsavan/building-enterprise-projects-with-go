@@ -9,25 +9,31 @@ import (
 )
 
 func main() {
-	leakExample()
+	leakyDispatcher()
 }
 
-func leakExample() {
+// leakyDispatcher shows a goroutine leak in a transport dispatcher.
+// A sender keeps pushing route IDs but we stop receiving, so the goroutine stays blocked.
+func leakyDispatcher() {
 	fmt.Println("goroutines before leak:", runtime.NumGoroutine())
-	out := make(chan int)
 
+	routes := make(chan string)
+
+	// Dispatch loop that never stops sending.
 	go func() {
 		for i := 0; ; i++ {
-			out <- i // blocks when no receiver exists
+			routes <- fmt.Sprintf("route-%02d", i) // blocks when no receiver exists
 		}
 	}()
 
-	for n := range out {
-		fmt.Println(n)
-		if n == 5 {
+	// Consumer stops early, leaving the dispatcher goroutine blocked on send.
+	for r := range routes {
+		fmt.Println("assigned:", r)
+		if r == "route-05" {
 			break
 		}
 	}
+
 	time.Sleep(time.Second)
 	fmt.Println("goroutines after leak:", runtime.NumGoroutine())
 }
